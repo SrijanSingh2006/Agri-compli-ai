@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import google.generativeai as genai
