@@ -1,0 +1,2730 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriComply AI | Smart Farmer Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-deep: #0f2f27;
+    --bg-mid: #194739;
+    --surface: rgba(247, 252, 248, 0.92);
+    --panel-border: rgba(255, 255, 255, 0.42);
+    --ink: #15231e;
+    --ink-muted: #5e726a;
+    --accent: #66d08f;
+    --accent-strong: #2a9d60;
+    --accent-warm: #f2bf60;
+    --danger-bg: #fde9e9;
+    --danger-ink: #b33333;
+    --shadow-lg: 0 28px 60px rgba(6, 24, 18, 0.24);
+    --shadow-md: 0 14px 28px rgba(10, 30, 22, 0.13);
+    --shadow-sm: 0 8px 16px rgba(10, 30, 22, 0.08);
+    --radius-xl: 28px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+}
+
+* { box-sizing: border-box; outline: none; }
+html, body { height: 100%; }
+
+body {
+    margin: 0;
+    font-family: "Manrope", "Noto Sans Devanagari", sans-serif;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+        radial-gradient(1100px 760px at -8% -12%, rgba(102, 208, 143, 0.3), transparent 58%),
+        radial-gradient(900px 620px at 108% 12%, rgba(242, 191, 96, 0.25), transparent 58%),
+        radial-gradient(1000px 640px at 22% 120%, rgba(75, 160, 102, 0.2), transparent 66%),
+        linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 48%, #25523a 100%);
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+body::before {
+    width: 40vw;
+    height: 40vw;
+    left: -8vw;
+    top: -20vw;
+    background: radial-gradient(circle, rgba(102, 208, 143, 0.2) 0%, rgba(102, 208, 143, 0) 70%);
+    animation: driftA 16s ease-in-out infinite alternate;
+}
+
+body::after {
+    width: 36vw;
+    height: 36vw;
+    right: -10vw;
+    bottom: -14vw;
+    background: radial-gradient(circle, rgba(242, 191, 96, 0.2) 0%, rgba(242, 191, 96, 0) 70%);
+    animation: driftB 18s ease-in-out infinite alternate;
+}
+
+.main-container {
+    width: min(96vw, 1360px);
+    height: min(94vh, 920px);
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--panel-border);
+    background: var(--surface);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-lg);
+    animation: panelIn 550ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sidebar {
+    width: 420px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+    flex: 0 0 auto;
+    background:
+        radial-gradient(260px 200px at 8% -6%, rgba(102, 208, 143, 0.2), transparent 72%),
+        radial-gradient(260px 200px at 95% 105%, rgba(242, 191, 96, 0.12), transparent 70%),
+        linear-gradient(180deg, rgba(252, 255, 253, 0.97) 0%, rgba(241, 249, 245, 0.9) 62%, rgba(232, 244, 237, 0.86) 100%);
+}
+
+.sidebar::-webkit-scrollbar { width: 10px; }
+.sidebar::-webkit-scrollbar-track { background: rgba(16, 62, 46, 0.08); border-radius: 999px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(16, 62, 46, 0.32); border-radius: 999px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: rgba(16, 62, 46, 0.5); }
+
+.sidebar-resizer {
+    width: 8px;
+    flex: 0 0 auto;
+    cursor: col-resize;
+    background: linear-gradient(180deg, rgba(17, 64, 47, 0.08), rgba(17, 64, 47, 0.03));
+    border-left: 1px solid rgba(0,0,0,0.04);
+    border-right: 1px solid rgba(0,0,0,0.04);
+}
+.sidebar-resizer:hover { background: rgba(102, 208, 143, 0.24); }
+.resizing * { cursor: col-resize !important; user-select: none; }
+
+.brand-card,
+.info-card {
+    background: #fff;
+    border: 1px solid rgba(16, 62, 46, 0.1);
+    border-radius: 22px;
+    box-shadow: 0 14px 26px rgba(9, 34, 24, 0.08);
+    padding: 18px;
+}
+
+.brand-card {
+    position: relative;
+    overflow: visible;
+    background:
+        linear-gradient(130deg, rgba(250, 255, 252, 0.98) 0%, rgba(232, 247, 239, 0.95) 100%),
+        radial-gradient(circle at 106% -20%, rgba(102, 208, 143, 0.24), transparent 56%);
+}
+
+.brand-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(112deg, rgba(255, 255, 255, 0.56) 0%, rgba(255, 255, 255, 0) 56%);
+}
+
+.brand-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Fraunces", serif;
+    font-size: 38px;
+    line-height: 1.12;
+    letter-spacing: -0.3px;
+    color: #113e2e;
+    position: relative;
+    z-index: 1;
+    word-break: break-word;
+}
+
+.brand-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f8d979 0%, #79d69f 60%, #2ea262 100%);
+    box-shadow: 0 0 0 8px rgba(102, 208, 143, 0.18), 0 8px 16px rgba(41, 129, 83, 0.24);
+}
+
+.brand-subtitle {
+    margin: 11px 0 0;
+    color: #466a5d;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+    position: relative;
+    z-index: 1;
+}
+
+.info-card h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #12372b;
+}
+
+.info-card p,
+.info-card ul {
+    margin: 0;
+    color: #3e574f;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.info-card ul { padding-left: 18px; }
+.info-card li + li { margin-top: 4px; }
+
+.doc-card {
+    position: relative;
+    overflow: visible;
+    background:
+        radial-gradient(160px 90px at 94% 0%, rgba(102, 208, 143, 0.2), transparent 70%),
+        linear-gradient(145deg, rgba(247, 254, 250, 0.98) 0%, rgba(236, 248, 241, 0.96) 100%);
+    padding-top: 16px;
+}
+
+.doc-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6dd79a, #2ea161);
+}
+
+.progress-track {
+    width: 100%;
+    height: 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    border: 1px solid rgba(16, 62, 46, 0.08);
+    background: linear-gradient(180deg, rgba(204, 221, 214, 0.72), rgba(186, 208, 199, 0.52));
+    box-shadow: inset 0 2px 4px rgba(16, 62, 46, 0.08);
+}
+
+.progress-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7de1a9 0%, #4bc986 45%, #219c59 100%);
+    box-shadow: 0 0 0 1px rgba(21, 100, 61, 0.16), 0 4px 8px rgba(39, 133, 84, 0.28);
+    transition: width 320ms ease;
+}
+
+.progress-text {
+    margin: 10px 0 14px;
+    font-size: 13px;
+    color: #37584c;
+    line-height: 1.4;
+}
+
+.doc-checklist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+.doc-checklist li {
+    position: relative;
+    font-size: 14px;
+    font-weight: 600;
+    color: #445f55;
+    padding: 10px 12px 10px 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(16, 62, 46, 0.12);
+    background: linear-gradient(145deg, rgba(249, 254, 251, 0.95), rgba(241, 249, 245, 0.92));
+    transition: 220ms ease;
+}
+
+.doc-checklist li::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: #c6d8d0;
+    box-shadow: inset 0 0 0 1px rgba(16, 62, 46, 0.2);
+}
+
+.doc-checklist li.ready {
+    color: #0f5f39;
+    background: linear-gradient(140deg, rgba(209, 244, 222, 0.95), rgba(189, 234, 208, 0.92));
+    border-color: rgba(42, 157, 96, 0.38);
+    box-shadow: 0 8px 15px rgba(37, 125, 83, 0.14);
+}
+
+.doc-checklist li.ready::before {
+    background: #2ea161;
+    box-shadow: 0 0 0 4px rgba(102, 208, 143, 0.22);
+}
+
+.faq-section h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-family: "Fraunces", serif;
+    color: #1b4b38;
+}
+
+.faq-section {
+    margin-top: 2px;
+    border: 1px solid rgba(16, 62, 46, 0.1);
+    border-radius: 22px;
+    box-shadow: 0 14px 26px rgba(9, 34, 24, 0.08);
+    padding: 16px;
+    background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 250, 246, 0.94) 100%),
+        radial-gradient(200px 100px at 95% -8%, rgba(102, 208, 143, 0.16), transparent 70%);
+}
+
+.faq-btn {
+    width: 100%;
+    min-height: 52px;
+    padding: 11px 12px 11px 14px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(16, 62, 46, 0.14);
+    border-radius: 16px;
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.98), rgba(246, 252, 248, 0.94));
+    color: #21342d;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 8px 14px rgba(9, 34, 24, 0.08);
+    transition: 180ms ease, transform 180ms ease;
+}
+
+.faq-btn:hover,
+.faq-btn.active {
+    border-color: rgba(42, 157, 96, 0.45);
+    box-shadow: 0 12px 20px rgba(42, 157, 96, 0.17);
+    transform: translateY(-1px);
+}
+
+.faq-label {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+    color: #1f3f34;
+}
+
+.faq-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 800;
+    border-radius: 50%;
+    color: #245641;
+    border: 1px solid rgba(42, 157, 96, 0.3);
+    background: rgba(102, 208, 143, 0.18);
+    transition: 200ms ease;
+}
+
+.faq-btn.active .faq-icon {
+    color: #fff;
+    border-color: #2a9d60;
+    background: #2a9d60;
+    transform: rotate(180deg);
+}
+
+.faq-content {
+    margin-top: 2px;
+    margin-bottom: 10px;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px;
+    border-radius: 0 0 14px 14px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.65;
+    color: #466157;
+    background: linear-gradient(180deg, rgba(252, 255, 253, 0.94), rgba(244, 250, 246, 0.9));
+    transition: max-height 220ms ease, padding 220ms ease, border-color 220ms ease;
+}
+
+.faq-content.open {
+    padding: 12px 12px;
+    border-color: rgba(16, 62, 46, 0.12);
+    overflow: visible;
+}
+
+.chat-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(640px 380px at 100% -2%, rgba(102, 208, 143, 0.18), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,0.84) 0%, rgba(255,255,255,0.66) 100%);
+}
+
+.chat-header {
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    background: rgba(255,255,255,0.9);
+}
+
+.chat-title h2 {
+    margin: 0;
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+    color: #132f25;
+}
+
+.status-line {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(42, 157, 96, 0.28);
+    background: linear-gradient(130deg, rgba(230, 248, 238, 0.95) 0%, rgba(242, 252, 247, 0.95) 100%);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #1c6a44;
+    box-shadow: 0 6px 14px rgba(18, 76, 52, 0.09);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #35c776;
+    animation: pulse 1.9s infinite;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.language-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #3f544b;
+}
+
+.language-select {
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid rgba(16, 62, 46, 0.2);
+    border-radius: 999px;
+    background: #fff;
+    color: #20352d;
+    font-size: 12px;
+}
+
+.mobile-side-btn {
+    display: none;
+    padding: 8px 12px;
+    border: 1px solid rgba(16, 62, 46, 0.18);
+    border-radius: 999px;
+    background: #fff;
+    color: #21342d;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.quick-actions {
+    position: relative;
+    padding: 17px 16px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 11px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-top: 1px solid rgba(16, 62, 46, 0.08);
+    border-bottom: 1px solid rgba(16, 62, 46, 0.08);
+    background:
+        radial-gradient(460px 130px at 8% -124%, rgba(102, 208, 143, 0.3), transparent 70%),
+        radial-gradient(460px 130px at 100% 124%, rgba(242, 191, 96, 0.15), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(243,250,246,0.9) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.quick-actions::before {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 7px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(42, 157, 96, 0.05), rgba(42, 157, 96, 0.46), rgba(242, 191, 96, 0.42), rgba(42, 157, 96, 0.05));
+    pointer-events: none;
+}
+
+.quick-actions > * {
+    position: relative;
+    z-index: 1;
+}
+
+.quick-actions::-webkit-scrollbar {
+    height: 8px;
+}
+
+.quick-actions::-webkit-scrollbar-thumb {
+    background: rgba(13, 56, 39, 0.3);
+    border-radius: 999px;
+}
+
+.chip-btn,
+.action-select {
+    min-height: 46px;
+    padding: 0 16px;
+    border: 1px solid rgba(16, 62, 46, 0.2);
+    border-radius: 15px;
+    background: linear-gradient(170deg, #ffffff 0%, #edf8f1 100%);
+    color: #1d392f;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.15px;
+    box-shadow: 0 10px 16px rgba(10, 30, 22, 0.09);
+    transition: 180ms ease, transform 180ms ease;
+}
+
+.action-select {
+    min-width: 198px;
+    max-width: 260px;
+    padding-right: 38px;
+}
+
+.chip-btn { cursor: pointer; }
+
+.chip-btn:hover,
+.action-select:focus {
+    border-color: rgba(42, 157, 96, 0.5);
+    box-shadow: 0 0 0 3px rgba(102, 208, 143, 0.2), 0 10px 16px rgba(20, 58, 40, 0.12);
+    transform: translateY(-2px);
+}
+
+.chip-emphasis {
+    background: linear-gradient(140deg, #cdf2dd 0%, #aee9c8 100%);
+    color: #0c4d2d;
+    border-color: rgba(42, 157, 96, 0.48);
+    box-shadow: 0 10px 18px rgba(39, 141, 89, 0.2);
+}
+
+.chip-danger {
+    background: linear-gradient(140deg, #ffe7e7 0%, #ffd9d9 100%);
+    border-color: #e8b3b3;
+    color: #b23838;
+    box-shadow: 0 10px 18px rgba(161, 58, 58, 0.14);
+}
+
+#uploadBtn {
+    background: linear-gradient(145deg, #e8f4ff 0%, #dff2ea 100%);
+}
+
+#pmKisanBtn {
+    background: linear-gradient(145deg, #f3fff7 0%, #e5f8ed 100%);
+}
+
+#insuranceBtn {
+    background: linear-gradient(145deg, #f0fbff 0%, #e8f6ff 100%);
+}
+
+#helplineBtn {
+    background: linear-gradient(145deg, #fff9f0 0%, #fff3dc 100%);
+}
+
+.chat-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 24px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+}
+
+.chat-body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.25;
+    background-image:
+        linear-gradient(transparent 96%, rgba(18, 60, 45, 0.03) 96%),
+        linear-gradient(90deg, transparent 96%, rgba(18, 60, 45, 0.03) 96%);
+    background-size: 34px 34px;
+}
+
+.chat-body > * {
+    position: relative;
+    z-index: 1;
+}
+
+.chat-body::-webkit-scrollbar { width: 7px; }
+.chat-body::-webkit-scrollbar-thumb { background: rgba(13, 42, 31, 0.24); border-radius: 999px; }
+
+.message {
+    max-width: min(80%, 720px);
+    padding: 10px 14px;
+    border: 1px solid rgba(13, 42, 31, 0.08);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    animation: messageIn 230ms ease;
+}
+
+.message-head {
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #476057;
+}
+
+.message-text {
+    font-size: 14px;
+    line-height: 1.58;
+    color: #1e312a;
+    word-wrap: break-word;
+}
+
+.bot-rich {
+    display: grid;
+    gap: 10px;
+}
+
+.bot-title {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(42, 157, 96, 0.26);
+    border-left: 4px solid #2a9d60;
+    border-radius: 12px;
+    background: linear-gradient(130deg, rgba(228, 249, 237, 0.9) 0%, rgba(242, 251, 245, 0.9) 100%);
+    font-family: "Fraunces", serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #123628;
+}
+
+.bot-intro {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #40594f;
+}
+
+.bot-paragraph {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.58;
+    color: #21362e;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: rgba(245, 251, 247, 0.85);
+    border: 1px solid rgba(16, 62, 46, 0.08);
+}
+
+.bot-bullet-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.bot-bullet-item {
+    margin: 0;
+    position: relative;
+    padding: 9px 12px 9px 34px;
+    border-radius: 10px;
+    background: linear-gradient(140deg, rgba(247, 253, 249, 0.96) 0%, rgba(241, 250, 244, 0.96) 100%);
+    border: 1px solid rgba(16, 62, 46, 0.1);
+    font-size: 14px;
+    line-height: 1.56;
+    color: #234037;
+}
+
+.bot-bullet-item::before {
+    content: "";
+    position: absolute;
+    left: 13px;
+    top: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2ca867;
+    box-shadow: 0 0 0 4px rgba(102, 208, 143, 0.2);
+}
+
+.scheme-list {
+    display: grid;
+    gap: 10px;
+}
+
+.scheme-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(16, 62, 46, 0.1);
+    border-radius: 12px;
+    background: linear-gradient(140deg, rgba(249, 254, 251, 0.95) 0%, rgba(243, 251, 246, 0.95) 100%);
+}
+
+.scheme-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    flex: 0 0 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: #103529;
+    background: linear-gradient(140deg, #a5ebc2 0%, #7ed9a5 100%);
+    border: 1px solid rgba(42, 157, 96, 0.3);
+    margin-top: 1px;
+}
+
+.scheme-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.scheme-name {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.38;
+    color: #17392d;
+}
+
+.scheme-desc {
+    margin-top: 3px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #355046;
+}
+
+.scheme-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(42, 157, 96, 0.25);
+    background: rgba(102, 208, 143, 0.2);
+    color: #155f38;
+    font-size: 11px;
+    font-weight: 800;
+    vertical-align: middle;
+}
+
+.key-word {
+    color: #165d37;
+    font-weight: 800;
+}
+
+.missing-note,
+.missing-note * {
+    color: #ba3b3b !important;
+    font-weight: 700;
+}
+
+.scheme-note {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(177, 117, 24, 0.25);
+    background: #fff1dc;
+    color: #8e5d1d;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.message-time {
+    margin-top: 6px;
+    font-size: 10px;
+    color: #60736b;
+}
+
+.message.bot {
+    align-self: flex-start;
+    border-radius: 16px 16px 16px 6px;
+    background: #fff;
+}
+
+.message.user {
+    align-self: flex-end;
+    border-radius: 16px 16px 6px 16px;
+    background: linear-gradient(140deg, #d8f8e7 0%, #c0f0d8 100%);
+    border-color: rgba(42, 157, 96, 0.34);
+}
+
+.message.typing .message-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #628379;
+    animation: blink 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 120ms; }
+.typing-dot:nth-child(3) { animation-delay: 240ms; }
+
+.doc-preview-container {
+    position: absolute;
+    right: 20px;
+    bottom: 94px;
+    z-index: 12;
+    display: none;
+    padding: 8px;
+    border: 1px solid rgba(13, 42, 31, 0.1);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: var(--shadow-md);
+}
+
+.doc-preview-container img {
+    display: block;
+    max-width: 148px;
+    border-radius: 10px;
+}
+
+.preview-caption {
+    margin-top: 5px;
+    font-size: 10px;
+    text-align: center;
+    color: #60736b;
+}
+
+.chat-footer {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    background: rgba(255,255,255,0.94);
+}
+
+.input-group {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    padding: 4px 8px 4px 14px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: #f1f4f2;
+    transition: 180ms ease;
+}
+
+.input-group:focus-within {
+    border-color: rgba(42, 157, 96, 0.45);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(102, 208, 143, 0.16);
+}
+
+.input-group input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 10px 6px;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: #22372f;
+}
+
+.icon-btn {
+    height: 38px;
+    min-width: 38px;
+    padding: 0 10px;
+    border: 1px solid rgba(16, 62, 46, 0.12);
+    border-radius: 999px;
+    background: #fff;
+    color: #40564d;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 180ms ease;
+}
+
+.icon-btn.icon-only {
+    width: 38px;
+    min-width: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.icon-btn:hover {
+    border-color: rgba(42, 157, 96, 0.45);
+    background: #f7fffa;
+}
+
+.icon-btn.listening {
+    color: #0f5e37;
+    border-color: rgba(42, 157, 96, 0.56);
+    box-shadow: 0 0 0 3px rgba(102, 208, 143, 0.2);
+}
+
+.send-btn {
+    min-height: 40px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(140deg, #79dea2 0%, #49c57e 100%);
+    color: #163227;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(42, 157, 96, 0.34);
+    transition: 180ms ease;
+}
+
+.send-btn:hover { transform: translateY(-1px); }
+.mobile-overlay { display: none; }
+
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes messageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(53, 199, 118, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(53, 199, 118, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(53, 199, 118, 0); }
+}
+
+@keyframes blink {
+    0%, 80%, 100% { transform: scale(0.85); opacity: 0.45; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes driftA {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(2vw, 1.4vw, 0); }
+}
+
+@keyframes driftB {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-2vw, -1vw, 0); }
+}
+
+@media (max-width: 1120px) {
+    .sidebar { width: 360px; }
+    .brand-title { font-size: 34px; }
+}
+
+@media (max-width: 880px) {
+    body { align-items: stretch; }
+
+    .main-container {
+        width: 100vw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+    }
+
+    .sidebar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        z-index: 25;
+        width: min(86vw, 360px);
+        transform: translateX(-104%);
+        transition: transform 250ms ease;
+        box-shadow: 20px 0 30px rgba(0,0,0,0.24);
+    }
+
+    .main-container.show-sidebar .sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-resizer { display: none; }
+    .chat-header { padding: 14px; }
+    .chat-title h2 { font-size: 18px; }
+    .mobile-side-btn { display: inline-flex; }
+
+    .quick-actions {
+        padding: 12px 10px 13px;
+        gap: 8px;
+    }
+
+    .action-select {
+        min-width: 138px;
+        max-width: 170px;
+        padding-right: 30px;
+    }
+
+    .chip-btn,
+    .action-select {
+        min-height: 40px;
+        font-size: 13px;
+        border-radius: 12px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .brand-title {
+        font-size: 28px;
+    }
+
+    .brand-subtitle,
+    .progress-text,
+    .doc-checklist li {
+        font-size: 13px;
+    }
+
+    .faq-section {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .faq-btn {
+        min-height: 46px;
+    }
+
+    .chat-body { padding: 16px 12px; }
+    .message { max-width: 90%; }
+
+    .chat-footer {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .send-btn { padding: 10px 14px; }
+
+    .doc-preview-container {
+        right: 12px;
+        bottom: 82px;
+    }
+
+    .mobile-overlay {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: rgba(0,0,0,0.32);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 250ms ease;
+    }
+
+    .main-container.show-sidebar .mobile-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="main-container" id="mainContainer">
+    <aside class="sidebar">
+        <section class="brand-card">
+            <h1 class="brand-title"><span class="brand-dot"></span>AgriComply AI</h1>
+            <p class="brand-subtitle" id="brandSubtitle">Ask in your language and check document readiness quickly.</p>
+        </section>
+
+        <section class="info-card doc-card">
+            <h4 id="docHeading">Document Readiness</h4>
+            <div class="progress-track"><div class="progress-fill" id="docProgressBar"></div></div>
+            <p class="progress-text" id="docProgressText">Upload documents to start building your eligibility score.</p>
+            <ul class="doc-checklist">
+                <li id="docAadhaar">Aadhaar document</li>
+                <li id="docLand">Land record</li>
+                <li id="docBank">Bank details</li>
+            </ul>
+        </section>
+
+        <section class="faq-section">
+            <h3 id="faqTitle">FAQs</h3>
+            <button class="faq-btn" onclick="toggleFAQ(this)"><span class="faq-label" id="faqQ1Label">Is this free for farmers?</span><span class="faq-icon">+</span></button>
+            <div class="faq-content" id="faqA1">Yes. This assistant is designed to be free for farmers.</div>
+
+            <button class="faq-btn" onclick="toggleFAQ(this)"><span class="faq-label" id="faqQ2Label">How do I upload a document?</span><span class="faq-icon">+</span></button>
+            <div class="faq-content" id="faqA2">Choose a document type, then click Upload or Camera.</div>
+
+            <button class="faq-btn" onclick="toggleFAQ(this)"><span class="faq-label" id="faqQ3Label">Does this work offline?</span><span class="faq-icon">+</span></button>
+            <div class="faq-content" id="faqA3">No. Live responses require internet and your local backend server.</div>
+        </section>
+    </aside>
+
+    <div id="sidebarResizer" class="sidebar-resizer" title="Drag to resize"></div>
+
+    <main class="chat-area">
+        <header class="chat-header">
+            <div class="chat-title">
+                <h2 id="chatTitle">Farmer Assistant</h2>
+                <div class="status-line"><span class="status-dot"></span><span id="statusText">Online</span></div>
+            </div>
+
+            <div class="header-actions">
+                <button id="mobileSidebarToggle" class="mobile-side-btn" type="button">Insights</button>
+                <label class="language-label" id="languageLabel" for="language">Language</label>
+                <select id="language" class="language-select">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="ta">Tamil</option>
+                    <option value="te">Telugu</option>
+                    <option value="bn">Bengali</option>
+                    <option value="bho">Bhojpuri</option>
+                </select>
+            </div>
+        </header>
+
+        <section class="quick-actions">
+            <button id="locateBtn" class="chip-btn chip-emphasis" onclick="detectLocation()">Locate</button>
+
+            <select id="stateSelect" class="action-select" onchange="sendLocationSchemes()">
+                <option value="">Select State</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Punjab">Punjab</option>
+                <option value="West Bengal">West Bengal</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Karnataka">Karnataka</option>
+            </select>
+            <select id="docType" class="action-select">
+                <option value="">Select Doc Type</option>
+                <option value="aadhaar">Aadhaar</option>
+                <option value="land">Land Record</option>
+                <option value="bank">Bank Book</option>
+            </select>
+
+            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleDocumentUpload(this)">
+            <button id="uploadBtn" class="chip-btn" onclick="document.getElementById('fileInput').click()">Upload</button>
+
+            <button id="pmKisanBtn" class="chip-btn" onclick="sendQuickPrompt('pmKisan')">PM-KISAN</button>
+            <button id="insuranceBtn" class="chip-btn" onclick="sendQuickPrompt('insurance')">Insurance</button>
+            <button id="helplineBtn" class="chip-btn" onclick="callHelp()">Helpline</button>
+            <button id="resetBtn" class="chip-btn chip-danger" onclick="clearChat()">Reset</button>
+        </section>
+
+        <section class="chat-body" id="chatBody">
+            <div class="message bot" id="initialBotMessage">
+                <div class="message-head" id="initialBotHead">Assistant</div>
+                <div class="message-text" id="initialBotText">Namaste. I can help you with government schemes and document readiness.<br>Upload a document or ask a question to start.</div>
+                <div class="message-time" id="initialBotTime">Now</div>
+            </div>
+        </section>
+
+        <div id="previewContainer" class="doc-preview-container">
+            <img id="docPreview" src="" alt="Preview">
+            <div class="preview-caption" id="previewCaption">Image ready to send</div>
+        </div>
+
+        <footer class="chat-footer">
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleDocumentUpload(this)">
+            <button id="cameraBtn" class="icon-btn icon-only" onclick="document.getElementById('cameraInput').click()" title="Open Camera" aria-label="Open Camera">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 8h3l1.8-2h6.4L17 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z"></path>
+                    <circle cx="12" cy="14" r="3.5"></circle>
+                </svg>
+            </button>
+
+            <div class="input-group">
+                <input type="text" id="userInput" placeholder="Type your question or use voice" onkeypress="handleEnter(event)">
+                <button id="voiceBtn" class="icon-btn icon-only" onclick="startVoice()" title="Voice Input" aria-label="Voice Input">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="9" y="3" width="6" height="11" rx="3"></rect>
+                        <path d="M6.5 11.5a5.5 5.5 0 0 0 11 0"></path>
+                        <path d="M12 17v4"></path>
+                        <path d="M9.5 21h5"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <button id="sendBtn" class="send-btn" onclick="sendMessage()">Send</button>
+        </footer>
+    </main>
+
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+</div>
+
+<script>
+let currentImageBase64 = null;
+let activeTypingEl = null;
+let activeRecognition = null;
+let voiceSessionActive = false;
+const CHAT_API_URL = new URLSearchParams(window.location.search).get("chatApi") || "http://127.0.0.1:5001/chat";
+
+const uploadedDocs = { aadhaar: false, land: false, bank: false };
+const eligibilityScoreMap = { aadhaar: 30, land: 40, bank: 30 };
+
+const sidebar = document.querySelector(".sidebar");
+const resizer = document.getElementById("sidebarResizer");
+const mainContainer = document.getElementById("mainContainer");
+const mobileSidebarToggle = document.getElementById("mobileSidebarToggle");
+const mobileOverlay = document.getElementById("mobileOverlay");
+
+const minSidebar = 320;
+const maxSidebar = 560;
+const minChat = 420;
+const resizerWidth = 8;
+
+const docProgressBar = document.getElementById("docProgressBar");
+const docProgressText = document.getElementById("docProgressText");
+const docAadhaar = document.getElementById("docAadhaar");
+const docLand = document.getElementById("docLand");
+const docBank = document.getElementById("docBank");
+const languageSelect = document.getElementById("language");
+
+const uiLanguageContent = {
+    en: {
+        statusOnline: "Online",
+        languageLabel: "Language",
+        brandSubtitle: "Ask in your language and check document readiness quickly.",
+        docHeading: "Document Readiness",
+        docItems: {
+            aadhaar: "Aadhaar document",
+            land: "Land record",
+            bank: "Bank details"
+        },
+        docStart: "Upload documents to start building your eligibility score.",
+        docDone: "All key documents attached. You are ready for eligibility checks.",
+        docCurrent: "Current score: <b>{score}/100</b>. Missing: {missing}.",
+        quickActions: {
+            locate: "Locate",
+            selectState: "Select State",
+            selectDocType: "Select Doc Type",
+            upload: "Upload",
+            pmKisan: "PM-KISAN",
+            insurance: "Insurance",
+            helpline: "Helpline",
+            reset: "Reset"
+        },
+        stateOptions: {
+            "Uttar Pradesh": "Uttar Pradesh",
+            "Maharashtra": "Maharashtra",
+            "Telangana": "Telangana",
+            "Andhra Pradesh": "Andhra Pradesh",
+            "Tamil Nadu": "Tamil Nadu",
+            "Punjab": "Punjab",
+            "West Bengal": "West Bengal",
+            "Bihar": "Bihar",
+            "Karnataka": "Karnataka"
+        },
+        docTypeOptions: {
+            aadhaar: "Aadhaar",
+            land: "Land Record",
+            bank: "Bank Book"
+        },
+        languageOptions: {
+            en: "English",
+            hi: "Hindi",
+            ta: "Tamil",
+            te: "Telugu",
+            bn: "Bengali",
+            bho: "Bhojpuri"
+        },
+        faqTitle: "FAQs",
+        faqs: [
+            {
+                q: "Is this free for farmers?",
+                a: "Yes. This assistant is designed to be free for farmers."
+            },
+            {
+                q: "How do I upload a document?",
+                a: "Choose a document type, then click Upload or Camera."
+            },
+            {
+                q: "Does this work offline?",
+                a: "No. Live responses require internet and your local backend server."
+            }
+        ]
+    },
+    hi: {
+        statusOnline: "ऑनलाइन",
+        languageLabel: "भाषा",
+        brandSubtitle: "अपनी भाषा में पूछें और दस्तावेज़ तैयारी जल्दी जांचें।",
+        docHeading: "दस्तावेज़ तैयारी",
+        docItems: {
+            aadhaar: "आधार दस्तावेज़",
+            land: "भूमि रिकॉर्ड",
+            bank: "बैंक विवरण"
+        },
+        docStart: "पात्रता स्कोर बनाने के लिए दस्तावेज़ अपलोड करें।",
+        docDone: "सभी जरूरी दस्तावेज़ जुड़े हैं। आप पात्रता जांच के लिए तैयार हैं।",
+        docCurrent: "वर्तमान स्कोर: <b>{score}/100</b>. कमी: {missing}.",
+        quickActions: {
+            locate: "लोकेट",
+            selectState: "राज्य चुनें",
+            selectDocType: "दस्तावेज़ प्रकार चुनें",
+            upload: "अपलोड",
+            pmKisan: "पीएम-किसान",
+            insurance: "बीमा",
+            helpline: "हेल्पलाइन",
+            reset: "रीसेट"
+        },
+        stateOptions: {
+            "Uttar Pradesh": "उत्तर प्रदेश",
+            "Maharashtra": "महाराष्ट्र",
+            "Telangana": "तेलंगाना",
+            "Andhra Pradesh": "आंध्र प्रदेश",
+            "Tamil Nadu": "तमिलनाडु",
+            "Punjab": "पंजाब",
+            "West Bengal": "पश्चिम बंगाल",
+            "Bihar": "बिहार",
+            "Karnataka": "कर्नाटक"
+        },
+        docTypeOptions: {
+            aadhaar: "आधार",
+            land: "भूमि रिकॉर्ड",
+            bank: "बैंक पासबुक"
+        },
+        languageOptions: {
+            en: "अंग्रेज़ी",
+            hi: "हिन्दी",
+            ta: "तमिल",
+            te: "तेलुगु",
+            bn: "बंगाली",
+            bho: "भोजपुरी"
+        },
+        faqTitle: "अक्सर पूछे जाने वाले सवाल",
+        faqs: [
+            {
+                q: "क्या यह किसानों के लिए मुफ्त है?",
+                a: "हाँ। यह सहायक किसानों के लिए मुफ्त रखा गया है।"
+            },
+            {
+                q: "दस्तावेज़ कैसे अपलोड करें?",
+                a: "पहले दस्तावेज़ प्रकार चुनें, फिर Upload या Camera दबाएं।"
+            },
+            {
+                q: "क्या यह ऑफलाइन चलता है?",
+                a: "नहीं। जवाब के लिए इंटरनेट और आपका लोकल बैकएंड सर्वर जरूरी है।"
+            }
+        ]
+    },
+    ta: {
+        statusOnline: "ஆன்லைன்",
+        languageLabel: "மொழி",
+        brandSubtitle: "உங்கள் மொழியில் கேளுங்கள்; ஆவண தயார்நிலையை விரைவாக பார்க்கலாம்.",
+        docHeading: "ஆவண தயார்நிலை",
+        docItems: {
+            aadhaar: "ஆதார் ஆவணம்",
+            land: "நில பதிவேடு",
+            bank: "வங்கி விவரங்கள்"
+        },
+        docStart: "தகுதி மதிப்பெண் தொடங்க ஆவணங்களை பதிவேற்றுங்கள்.",
+        docDone: "அனைத்து முக்கிய ஆவணங்களும் இணைக்கப்பட்டன. நீங்கள் தகுதி சரிபார்ப்புக்கு தயாராக உள்ளீர்கள்.",
+        docCurrent: "தற்போதைய மதிப்பெண்: <b>{score}/100</b>. இல்லை: {missing}.",
+        quickActions: {
+            locate: "இடம்",
+            selectState: "மாநிலம் தேர்வு",
+            selectDocType: "ஆவண வகை தேர்வு",
+            upload: "பதிவேற்று",
+            pmKisan: "பிஎம்-கிசான்",
+            insurance: "காப்பீடு",
+            helpline: "உதவி எண்",
+            reset: "மீட்டமை"
+        },
+        stateOptions: {
+            "Uttar Pradesh": "உத்தரப் பிரதேசம்",
+            "Maharashtra": "மகாராஷ்டிரா",
+            "Telangana": "தெலங்கானா",
+            "Andhra Pradesh": "ஆந்திரப் பிரதேசம்",
+            "Tamil Nadu": "தமிழ்நாடு",
+            "Punjab": "பஞ்சாப்",
+            "West Bengal": "மேற்கு வங்காளம்",
+            "Bihar": "பீகார்",
+            "Karnataka": "கர்நாடகா"
+        },
+        docTypeOptions: {
+            aadhaar: "ஆதார்",
+            land: "நில பதிவேடு",
+            bank: "வங்கி புத்தகம்"
+        },
+        languageOptions: {
+            en: "ஆங்கிலம்",
+            hi: "இந்தி",
+            ta: "தமிழ்",
+            te: "தெலுங்கு",
+            bn: "பெங்காலி",
+            bho: "போஜ்புரி"
+        },
+        faqTitle: "அடிக்கடி கேட்கப்படும் கேள்விகள்",
+        faqs: [
+            {
+                q: "இது விவசாயிகளுக்கு இலவசமா?",
+                a: "ஆம். இந்த உதவியாளர் விவசாயிகளுக்கு இலவசமாக பயன்படுத்த வடிவமைக்கப்பட்டுள்ளது."
+            },
+            {
+                q: "ஆவணத்தை எப்படி பதிவேற்றுவது?",
+                a: "முதலில் ஆவண வகையைத் தேர்ந்தெடுத்து, பிறகு Upload அல்லது Camera அழுத்துங்கள்."
+            },
+            {
+                q: "இது ஆஃப்லைனில் வேலைசெய்யுமா?",
+                a: "இல்லை. பதில்களுக்கு இணையமும் உங்கள் உள்ளூர் பேக்கெண்ட் சேவரும் தேவை."
+            }
+        ]
+    },
+    te: {
+        statusOnline: "ఆన్‌లైన్",
+        languageLabel: "భాష",
+        brandSubtitle: "మీ భాషలో అడిగి, డాక్యుమెంట్ రెడీనెస్‌ను త్వరగా చెక్ చేసుకోండి.",
+        docHeading: "డాక్యుమెంట్ సిద్ధత",
+        docItems: {
+            aadhaar: "ఆధార్ పత్రం",
+            land: "భూమి రికార్డు",
+            bank: "బ్యాంకు వివరాలు"
+        },
+        docStart: "అర్హత స్కోర్ ప్రారంభించడానికి పత్రాలను అప్‌లోడ్ చేయండి.",
+        docDone: "అన్ని ముఖ్య పత్రాలు జతయ్యాయి. మీరు అర్హత తనిఖీకి సిద్ధంగా ఉన్నారు.",
+        docCurrent: "ప్రస్తుత స్కోర్: <b>{score}/100</b>. మిగిలినవి: {missing}.",
+        quickActions: {
+            locate: "లొకేట్",
+            selectState: "రాష్ట్రం ఎంచుకోండి",
+            selectDocType: "డాక్ టైప్ ఎంచుకోండి",
+            upload: "అప్‌లోడ్",
+            pmKisan: "పీఎం-కిసాన్",
+            insurance: "భీమా",
+            helpline: "హెల్ప్‌లైన్",
+            reset: "రీసెట్"
+        },
+        stateOptions: {
+            "Uttar Pradesh": "ఉత్తర ప్రదేశ్",
+            "Maharashtra": "మహారాష్ట్ర",
+            "Telangana": "తెలంగాణ",
+            "Andhra Pradesh": "ఆంధ్ర ప్రదేశ్",
+            "Tamil Nadu": "తమిళనాడు",
+            "Punjab": "పంజాబ్",
+            "West Bengal": "పశ్చిమ బెంగాల్",
+            "Bihar": "బీహార్",
+            "Karnataka": "కర్ణాటక"
+        },
+        docTypeOptions: {
+            aadhaar: "ఆధార్",
+            land: "భూమి రికార్డు",
+            bank: "బ్యాంక్ పాస్‌బుక్"
+        },
+        languageOptions: {
+            en: "ఇంగ్లీష్",
+            hi: "హిందీ",
+            ta: "తమిళం",
+            te: "తెలుగు",
+            bn: "బెంగాలీ",
+            bho: "భోజ్‌పురి"
+        },
+        faqTitle: "తరచుగా అడిగే ప్రశ్నలు",
+        faqs: [
+            {
+                q: "ఇది రైతులకు ఉచితమేనా?",
+                a: "అవును. ఈ సహాయకం రైతుల కోసం ఉచితంగా రూపొందించబడింది."
+            },
+            {
+                q: "డాక్యుమెంట్ ఎలా అప్‌లోడ్ చేయాలి?",
+                a: "ముందు డాక్యుమెంట్ రకం ఎంచుకుని, తర్వాత Upload లేదా Camera నొక్కండి."
+            },
+            {
+                q: "ఇది ఆఫ్‌లైన్‌లో పనిచేస్తుందా?",
+                a: "కాదు. ప్రత్యక్ష జవాబులకు ఇంటర్నెట్ మరియు మీ లోకల్ బ్యాకెండ్ సర్వర్ అవసరం."
+            }
+        ]
+    },
+    bn: {
+        statusOnline: "অনলাইন",
+        languageLabel: "ভাষা",
+        brandSubtitle: "নিজের ভাষায় জিজ্ঞাসা করুন, ডকুমেন্ট প্রস্তুতি দ্রুত যাচাই করুন।",
+        docHeading: "ডকুমেন্ট প্রস্তুতি",
+        docItems: {
+            aadhaar: "আধার নথি",
+            land: "জমির রেকর্ড",
+            bank: "ব্যাংক বিবরণ"
+        },
+        docStart: "যোগ্যতার স্কোর শুরু করতে নথি আপলোড করুন।",
+        docDone: "সব গুরুত্বপূর্ণ নথি যুক্ত হয়েছে। আপনি যোগ্যতা যাচাইয়ের জন্য প্রস্তুত।",
+        docCurrent: "বর্তমান স্কোর: <b>{score}/100</b>. বাকি: {missing}.",
+        quickActions: {
+            locate: "লোকেট",
+            selectState: "রাজ্য নির্বাচন করুন",
+            selectDocType: "ডক টাইপ নির্বাচন করুন",
+            upload: "আপলোড",
+            pmKisan: "পিএম-কিষান",
+            insurance: "বীমা",
+            helpline: "হেল্পলাইন",
+            reset: "রিসেট"
+        },
+        stateOptions: {
+            "Uttar Pradesh": "উত্তর প্রদেশ",
+            "Maharashtra": "মহারাষ্ট্র",
+            "Telangana": "তেলেঙ্গানা",
+            "Andhra Pradesh": "আন্ধ্র প্রদেশ",
+            "Tamil Nadu": "তামিলনাড়ু",
+            "Punjab": "পাঞ্জাব",
+            "West Bengal": "পশ্চিমবঙ্গ",
+            "Bihar": "বিহার",
+            "Karnataka": "কর্নাটক"
+        },
+        docTypeOptions: {
+            aadhaar: "আধার",
+            land: "জমির রেকর্ড",
+            bank: "ব্যাংক পাসবই"
+        },
+        languageOptions: {
+            en: "ইংরেজি",
+            hi: "হিন্দি",
+            ta: "তামিল",
+            te: "তেলুগু",
+            bn: "বাংলা",
+            bho: "ভোজপুরি"
+        },
+        faqTitle: "প্রায়শই জিজ্ঞাসিত প্রশ্ন",
+        faqs: [
+            {
+                q: "এটি কি কৃষকদের জন্য ফ্রি?",
+                a: "হ্যাঁ। এই সহায়কটি কৃষকদের জন্য বিনামূল্যে রাখা হয়েছে।"
+            },
+            {
+                q: "ডকুমেন্ট কীভাবে আপলোড করব?",
+                a: "আগে ডকুমেন্ট টাইপ বাছুন, তারপর Upload বা Camera চাপুন।"
+            },
+            {
+                q: "এটি কি অফলাইনে কাজ করে?",
+                a: "না। লাইভ উত্তর পেতে ইন্টারনেট এবং লোকাল ব্যাকএন্ড সার্ভার দরকার।"
+            }
+        ]
+    },
+    bho: {
+        statusOnline: "ऑनलाइन",
+        languageLabel: "भाषा",
+        brandSubtitle: "अपन भाषा में पूछीं आ दस्तावेज़ तैयारिया जल्दी जांचीं।",
+        docHeading: "दस्तावेज़ तैयारी",
+        docItems: {
+            aadhaar: "आधार दस्तावेज़",
+            land: "जमीन रेकॉर्ड",
+            bank: "बैंक विवरण"
+        },
+        docStart: "योग्यता स्कोर शुरू करे खातिर दस्तावेज़ अपलोड करीं।",
+        docDone: "सब जरूरी दस्तावेज़ जुड़ गइल बा। अब रउआँ योग्यता जांच खातिर तैयार बानी।",
+        docCurrent: "मौजूदा स्कोर: <b>{score}/100</b>. बाकी: {missing}.",
+        quickActions: {
+            locate: "लोकेट",
+            selectState: "राज्य चुनीं",
+            selectDocType: "दस्तावेज़ प्रकार चुनीं",
+            upload: "अपलोड",
+            pmKisan: "पीएम-किसान",
+            insurance: "बीमा",
+            helpline: "हेल्पलाइन",
+            reset: "रीसेट"
+        },
+        stateOptions: {
+            "Uttar Pradesh": "उत्तर प्रदेश",
+            "Maharashtra": "महाराष्ट्र",
+            "Telangana": "तेलंगाना",
+            "Andhra Pradesh": "आंध्र प्रदेश",
+            "Tamil Nadu": "तमिलनाडु",
+            "Punjab": "पंजाब",
+            "West Bengal": "पश्चिम बंगाल",
+            "Bihar": "बिहार",
+            "Karnataka": "कर्नाटक"
+        },
+        docTypeOptions: {
+            aadhaar: "आधार",
+            land: "जमीन रेकॉर्ड",
+            bank: "बैंक पासबुक"
+        },
+        languageOptions: {
+            en: "अंगरेजी",
+            hi: "हिन्दी",
+            ta: "तमिल",
+            te: "तेलुगु",
+            bn: "बंगाली",
+            bho: "भोजपुरी"
+        },
+        faqTitle: "आम सवाल",
+        faqs: [
+            {
+                q: "का ई किसान लोग खातिर मुफ्त बा?",
+                a: "हँ। ई सहायक किसान लोग खातिर मुफ्त में बनावल गइल बा।"
+            },
+            {
+                q: "दस्तावेज़ कइसे अपलोड करीं?",
+                a: "पहिले दस्तावेज़ प्रकार चुनीं, फेर Upload या Camera दबाईं।"
+            },
+            {
+                q: "का ई ऑफलाइन चलेला?",
+                a: "ना। लाइव जवाब खातिर इंटरनेट आ लोकल बैकएंड सर्वर चाहीं।"
+            }
+        ]
+    }
+};
+
+const uiRuntimeText = {
+    en: {
+        pageTitle: "AgriComply AI | Smart Farmer Assistant",
+        chatTitle: "Farmer Assistant",
+        insights: "Insights",
+        assistantLabel: "Assistant",
+        userLabel: "You",
+        nowLabel: "Now",
+        initialBotHtml: "Namaste. I can help you with government schemes and document readiness.<br>Upload a document or ask a question to start.",
+        previewCaption: "Image ready to send",
+        inputPlaceholder: "Type your question or use voice",
+        listeningPlaceholder: "Listening...",
+        sendLabel: "Send",
+        openCameraLabel: "Open Camera",
+        voiceInputLabel: "Voice Input",
+        dragToResize: "Drag to resize",
+        quickPrompts: {
+            pmKisan: "PM-KISAN status check",
+            insurance: "Crop insurance options"
+        },
+        docTypeDisplay: {
+            aadhaar: "Aadhaar",
+            land: "Land Record",
+            bank: "Bank Book"
+        },
+        msg: {
+            kisanCallCenter: "Kisan Call Center: {number}",
+            chatCleared: "Chat cleared. Start a fresh conversation when ready.",
+            detectingLocation: "Detecting your GPS location...",
+            locationUnsupported: "Location is not supported by your browser.",
+            autoDetectFailed: "Could not auto-detect location. Please select state manually.",
+            gpsDenied: "GPS permission denied. Please select state manually.",
+            locationFound: "Location found: **{state}**",
+            locationFallback: "You are in **{state}**. Please choose the nearest state from the list to fetch top schemes via Gemini.",
+            selectStateFirst: "Please select a state first.",
+            fetchingSchemes: "Fetching latest schemes for **{state}**...",
+            topSchemes: "**Top schemes for {state}:**<br><br>{reply}",
+            fetchSchemesError: "<b>Could not fetch schemes from Gemini right now.</b><br>Please make sure <code>app.py</code> is running and try again. No saved scheme fallback is being used.",
+            imageLoaded: "Image loaded. Ask a question about this image when ready.",
+            imageSent: "Image sent",
+            connectionFailed: "<b>Connection failed.</b><br>Is app.py running on port 5001?<br>Check your terminal for errors.",
+            voiceNotSupported: "Voice input is not supported in this browser.",
+            voiceFailed: "Voice input failed. Please try again.",
+            docAttached: "**{type} attached.**<br>Readiness score: <b>{score}/100</b>",
+            docMissing: "<br><span class='missing-note'>Missing: {missing}</span>",
+            docAllAttached: "<br><span style='color:#147145; font-weight:700;'>All key documents attached.</span>"
+        }
+    },
+    hi: {
+        pageTitle: "AgriComply AI | स्मार्ट किसान सहायक",
+        chatTitle: "किसान सहायक",
+        insights: "जानकारी",
+        assistantLabel: "सहायक",
+        userLabel: "आप",
+        nowLabel: "अभी",
+        initialBotHtml: "नमस्ते। मैं सरकारी योजनाओं और दस्तावेज़ तैयारी में आपकी मदद कर सकता हूँ।<br>शुरू करने के लिए दस्तावेज़ अपलोड करें या सवाल पूछें।",
+        previewCaption: "छवि भेजने के लिए तैयार है",
+        inputPlaceholder: "अपना सवाल लिखें या आवाज़ का उपयोग करें",
+        listeningPlaceholder: "सुन रहा हूँ...",
+        sendLabel: "भेजें",
+        openCameraLabel: "कैमरा खोलें",
+        voiceInputLabel: "वॉइस इनपुट",
+        dragToResize: "आकार बदलने के लिए खींचें",
+        quickPrompts: {
+            pmKisan: "पीएम-किसान स्थिति जांच",
+            insurance: "फसल बीमा विकल्प"
+        },
+        docTypeDisplay: {
+            aadhaar: "आधार",
+            land: "भूमि रिकॉर्ड",
+            bank: "बैंक पासबुक"
+        },
+        msg: {
+            kisanCallCenter: "किसान कॉल सेंटर: {number}",
+            chatCleared: "चैट साफ कर दी गई। तैयार होने पर नई बातचीत शुरू करें।",
+            detectingLocation: "आपकी GPS लोकेशन पता की जा रही है...",
+            locationUnsupported: "आपके ब्राउज़र में लोकेशन सपोर्ट नहीं है।",
+            autoDetectFailed: "लोकेशन अपने आप नहीं मिली। कृपया राज्य चुनें।",
+            gpsDenied: "GPS अनुमति नहीं मिली। कृपया राज्य चुनें।",
+            locationFound: "लोकेशन मिली: **{state}**",
+            locationFallback: "आप **{state}** में हैं। कृपया सूची से नजदीकी राज्य चुनें और Gemini से योजनाएं देखें।",
+            selectStateFirst: "कृपया पहले राज्य चुनें।",
+            fetchingSchemes: "**{state}** के लिए नवीनतम योजनाएं लाई जा रही हैं...",
+            topSchemes: "**{state} के लिए शीर्ष योजनाएं:**<br><br>{reply}",
+            fetchSchemesError: "<b>अभी Gemini से योजनाएं नहीं मिल पाईं।</b><br>कृपया <code>app.py</code> चल रहा है या नहीं, जांचें और फिर प्रयास करें।",
+            imageLoaded: "छवि लोड हो गई। चाहें तो इस छवि पर सवाल पूछें।",
+            imageSent: "छवि भेजी गई",
+            connectionFailed: "<b>कनेक्शन विफल।</b><br>क्या app.py पोर्ट 5001 पर चल रहा है?<br>टर्मिनल में त्रुटि जांचें।",
+            voiceNotSupported: "इस ब्राउज़र में वॉइस इनपुट उपलब्ध नहीं है।",
+            voiceFailed: "वॉइस इनपुट विफल हुआ। कृपया फिर प्रयास करें।",
+            docAttached: "**{type} जोड़ा गया।**<br>तैयारी स्कोर: <b>{score}/100</b>",
+            docMissing: "<br><span class='missing-note'>कमी: {missing}</span>",
+            docAllAttached: "<br><span style='color:#147145; font-weight:700;'>सभी जरूरी दस्तावेज़ जुड़े हैं।</span>"
+        }
+    },
+    ta: {
+        pageTitle: "AgriComply AI | ஸ்மார்ட் விவசாய உதவியாளர்",
+        chatTitle: "விவசாய உதவியாளர்",
+        insights: "தகவல்கள்",
+        assistantLabel: "உதவியாளர்",
+        userLabel: "நீங்கள்",
+        nowLabel: "இப்போது",
+        initialBotHtml: "வணக்கம். அரசு திட்டங்கள் மற்றும் ஆவண தயார்நிலையில் நான் உதவுவேன்.<br>தொடங்க ஒரு ஆவணம் பதிவேற்றுங்கள் அல்லது கேள்வி கேளுங்கள்.",
+        previewCaption: "படம் அனுப்ப தயாராக உள்ளது",
+        inputPlaceholder: "உங்கள் கேள்வியை টাইப் செய்யவும் அல்லது குரல் பயன்படுத்தவும்",
+        listeningPlaceholder: "கேட்கிறேன்...",
+        sendLabel: "அனுப்பு",
+        openCameraLabel: "கேமரா திற",
+        voiceInputLabel: "குரல் உள்ளீடு",
+        dragToResize: "அளவு மாற்ற இழுக்கவும்",
+        quickPrompts: {
+            pmKisan: "PM-KISAN நிலை சரிபார்",
+            insurance: "பயிர் காப்பீடு விருப்பங்கள்"
+        },
+        docTypeDisplay: {
+            aadhaar: "ஆதார்",
+            land: "நில பதிவேடு",
+            bank: "வங்கி புத்தகம்"
+        },
+        msg: {
+            kisanCallCenter: "கிசான் அழைப்பு மையம்: {number}",
+            chatCleared: "அரட்டை நீக்கப்பட்டது. தயாரானபோது புதிய உரையாடலை தொடங்கலாம்.",
+            detectingLocation: "உங்கள் GPS இடம் கண்டறியப்படுகிறது...",
+            locationUnsupported: "உங்கள் உலாவியில் இடம் ஆதரிக்கப்படவில்லை.",
+            autoDetectFailed: "இடத்தை தானாக கண்டறிய முடியவில்லை. மாநிலத்தை கைமுறையாக தேர்ந்தெடுக்கவும்.",
+            gpsDenied: "GPS அனுமதி மறுக்கப்பட்டது. மாநிலத்தை கைமுறையாக தேர்ந்தெடுக்கவும்.",
+            locationFound: "இடம் கண்டுபிடிக்கப்பட்டது: **{state}**",
+            locationFallback: "நீங்கள் **{state}** பகுதியில் உள்ளீர்கள். பட்டியலில் அருகிலுள்ள மாநிலத்தை தேர்ந்தெடுக்கவும்.",
+            selectStateFirst: "முதலில் மாநிலத்தைத் தேர்ந்தெடுக்கவும்.",
+            fetchingSchemes: "**{state}** மாநிலத்திற்கான திட்டங்கள் பெறப்படுகிறது...",
+            topSchemes: "**{state} மாநிலத்தின் முக்கிய திட்டங்கள்:**<br><br>{reply}",
+            fetchSchemesError: "<b>இப்போது Gemini இலிருந்து திட்டங்களை பெற முடியவில்லை.</b><br><code>app.py</code> இயங்குகிறதா என சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+            imageLoaded: "படம் ஏற்றப்பட்டது. இதைப் பற்றி கேள்வி கேட்கலாம்.",
+            imageSent: "படம் அனுப்பப்பட்டது",
+            connectionFailed: "<b>இணைப்பு தோல்வி.</b><br>app.py 5001 போர்டில் இயங்குகிறதா?<br>டெர்மினலை சரிபார்க்கவும்.",
+            voiceNotSupported: "இந்த உலாவியில் குரல் உள்ளீடு ஆதரிக்கப்படவில்லை.",
+            voiceFailed: "குரல் உள்ளீடு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
+            docAttached: "**{type} இணைக்கப்பட்டது.**<br>தயார்நிலை மதிப்பெண்: <b>{score}/100</b>",
+            docMissing: "<br><span class='missing-note'>இல்லை: {missing}</span>",
+            docAllAttached: "<br><span style='color:#147145; font-weight:700;'>அனைத்து முக்கிய ஆவணங்களும் இணைக்கப்பட்டன.</span>"
+        }
+    },
+    te: {
+        pageTitle: "AgriComply AI | స్మార్ట్ రైతు సహాయకుడు",
+        chatTitle: "రైతు సహాయకుడు",
+        insights: "ఇన్‌సైట్స్",
+        assistantLabel: "సహాయకుడు",
+        userLabel: "మీరు",
+        nowLabel: "ఇప్పుడు",
+        initialBotHtml: "నమస్తే. నేను ప్రభుత్వ పథకాలు మరియు పత్రాల సిద్ధతలో సహాయం చేస్తాను.<br>ప్రారంభించడానికి పత్రం అప్‌లోడ్ చేయండి లేదా ప్రశ్న అడగండి.",
+        previewCaption: "చిత్రం పంపడానికి సిద్ధంగా ఉంది",
+        inputPlaceholder: "మీ ప్రశ్న టైప్ చేయండి లేదా వాయిస్ ఉపయోగించండి",
+        listeningPlaceholder: "వింటున్నాను...",
+        sendLabel: "పంపు",
+        openCameraLabel: "కెమెరా తెరువు",
+        voiceInputLabel: "వాయిస్ ఇన్‌పుట్",
+        dragToResize: "పరిమాణం మార్చడానికి లాగండి",
+        quickPrompts: {
+            pmKisan: "PM-KISAN స్థితి తనిఖీ",
+            insurance: "పంట బీమా ఎంపికలు"
+        },
+        docTypeDisplay: {
+            aadhaar: "ఆధార్",
+            land: "భూమి రికార్డు",
+            bank: "బ్యాంక్ పాస్‌బుక్"
+        },
+        msg: {
+            kisanCallCenter: "కిసాన్ కాల్ సెంటర్: {number}",
+            chatCleared: "చాట్ క్లియర్ అయ్యింది. సిద్ధంగా ఉన్నప్పుడు కొత్త సంభాషణ ప్రారంభించండి.",
+            detectingLocation: "మీ GPS స్థానం గుర్తిస్తున్నాం...",
+            locationUnsupported: "మీ బ్రౌజర్‌లో లోకేషన్ సపోర్ట్ లేదు.",
+            autoDetectFailed: "లోకేషన్ ఆటోగా గుర్తించలేకపోయాం. దయచేసి రాష్ట్రం ఎంచుకోండి.",
+            gpsDenied: "GPS అనుమతి నిరాకరించబడింది. దయచేసి రాష్ట్రం ఎంచుకోండి.",
+            locationFound: "లోకేషన్ కనుగొనబడింది: **{state}**",
+            locationFallback: "మీరు **{state}** లో ఉన్నారు. దయచేసి జాబితాలో సమీప రాష్ట్రం ఎంచుకోండి.",
+            selectStateFirst: "దయచేసి ముందుగా రాష్ట్రం ఎంచుకోండి.",
+            fetchingSchemes: "**{state}** కోసం తాజా పథకాలు పొందుతున్నాం...",
+            topSchemes: "**{state} కోసం టాప్ పథకాలు:**<br><br>{reply}",
+            fetchSchemesError: "<b>ఇప్పుడే Gemini నుండి పథకాలు తీసుకురాలేకపోయాం.</b><br><code>app.py</code> రన్ అవుతోందో చూసి మళ్లీ ప్రయత్నించండి.",
+            imageLoaded: "చిత్రం లోడ్ అయింది. ఈ చిత్రంపై ప్రశ్న అడగండి.",
+            imageSent: "చిత్రం పంపబడింది",
+            connectionFailed: "<b>కనెక్షన్ విఫలమైంది.</b><br>app.py 5001 పోర్ట్‌లో నడుస్తుందా?<br>టెర్మినల్‌లో చూడండి.",
+            voiceNotSupported: "ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ అందుబాటులో లేదు.",
+            voiceFailed: "వాయిస్ ఇన్‌పుట్ విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+            docAttached: "**{type} జత చేయబడింది.**<br>సిద్ధత స్కోర్: <b>{score}/100</b>",
+            docMissing: "<br><span class='missing-note'>మిగిలినవి: {missing}</span>",
+            docAllAttached: "<br><span style='color:#147145; font-weight:700;'>అన్ని ముఖ్య పత్రాలు జతయ్యాయి.</span>"
+        }
+    },
+    bn: {
+        pageTitle: "AgriComply AI | স্মার্ট কৃষক সহায়ক",
+        chatTitle: "কৃষক সহায়ক",
+        insights: "ইনসাইটস",
+        assistantLabel: "সহায়ক",
+        userLabel: "আপনি",
+        nowLabel: "এখন",
+        initialBotHtml: "নমস্তে। আমি সরকারি স্কিম ও ডকুমেন্ট প্রস্তুতিতে সাহায্য করতে পারি।<br>শুরু করতে ডকুমেন্ট আপলোড করুন বা প্রশ্ন করুন।",
+        previewCaption: "ছবি পাঠানোর জন্য প্রস্তুত",
+        inputPlaceholder: "আপনার প্রশ্ন লিখুন বা ভয়েস ব্যবহার করুন",
+        listeningPlaceholder: "শুনছি...",
+        sendLabel: "পাঠান",
+        openCameraLabel: "ক্যামেরা খুলুন",
+        voiceInputLabel: "ভয়েস ইনপুট",
+        dragToResize: "রিসাইজ করতে টানুন",
+        quickPrompts: {
+            pmKisan: "PM-KISAN স্ট্যাটাস চেক",
+            insurance: "ফসল বীমার বিকল্প"
+        },
+        docTypeDisplay: {
+            aadhaar: "আধার",
+            land: "জমির রেকর্ড",
+            bank: "ব্যাংক পাসবই"
+        },
+        msg: {
+            kisanCallCenter: "কিষান কল সেন্টার: {number}",
+            chatCleared: "চ্যাট ক্লিয়ার হয়েছে। প্রস্তুত হলে নতুন করে শুরু করুন।",
+            detectingLocation: "আপনার GPS লোকেশন শনাক্ত করা হচ্ছে...",
+            locationUnsupported: "আপনার ব্রাউজারে লোকেশন সাপোর্ট নেই।",
+            autoDetectFailed: "লোকেশন স্বয়ংক্রিয়ভাবে পাওয়া যায়নি। অনুগ্রহ করে রাজ্য বেছে নিন।",
+            gpsDenied: "GPS অনুমতি দেওয়া হয়নি। অনুগ্রহ করে রাজ্য বেছে নিন।",
+            locationFound: "লোকেশন পাওয়া গেছে: **{state}**",
+            locationFallback: "আপনি **{state}** এ আছেন। তালিকা থেকে নিকটবর্তী রাজ্য বেছে নিন।",
+            selectStateFirst: "অনুগ্রহ করে আগে রাজ্য নির্বাচন করুন।",
+            fetchingSchemes: "**{state}**-এর জন্য সর্বশেষ স্কিম আনা হচ্ছে...",
+            topSchemes: "**{state} এর শীর্ষ স্কিমসমূহ:**<br><br>{reply}",
+            fetchSchemesError: "<b>এই মুহূর্তে Gemini থেকে স্কিম আনা যায়নি।</b><br><code>app.py</code> চলছে কি না দেখে আবার চেষ্টা করুন।",
+            imageLoaded: "ছবি লোড হয়েছে। এই ছবিটি নিয়ে প্রশ্ন করতে পারেন।",
+            imageSent: "ছবি পাঠানো হয়েছে",
+            connectionFailed: "<b>সংযোগ ব্যর্থ।</b><br>app.py কি 5001 পোর্টে চলছে?<br>টার্মিনাল চেক করুন।",
+            voiceNotSupported: "এই ব্রাউজারে ভয়েস ইনপুট সমর্থিত নয়।",
+            voiceFailed: "ভয়েস ইনপুট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+            docAttached: "**{type} যুক্ত হয়েছে।**<br>প্রস্তুতি স্কোর: <b>{score}/100</b>",
+            docMissing: "<br><span class='missing-note'>বাকি: {missing}</span>",
+            docAllAttached: "<br><span style='color:#147145; font-weight:700;'>সব গুরুত্বপূর্ণ ডকুমেন্ট যুক্ত হয়েছে।</span>"
+        }
+    },
+    bho: {
+        pageTitle: "AgriComply AI | स्मार्ट किसान सहायक",
+        chatTitle: "किसान सहायक",
+        insights: "जानकारी",
+        assistantLabel: "सहायक",
+        userLabel: "रउआँ",
+        nowLabel: "अबहीं",
+        initialBotHtml: "नमस्ते। हम सरकारी योजना आ दस्तावेज़ तैयारी में मदद कर सकत बानी।<br>शुरू करे खातिर दस्तावेज़ अपलोड करीं या सवाल पूछीं।",
+        previewCaption: "फोटो भेजे खातिर तैयार बा",
+        inputPlaceholder: "अपना सवाल लिखीं या आवाज़ से बोलीं",
+        listeningPlaceholder: "सुनत बानी...",
+        sendLabel: "भेजीं",
+        openCameraLabel: "कैमरा खोलीं",
+        voiceInputLabel: "आवाज़ इनपुट",
+        dragToResize: "आकार बदले खातिर खींचीं",
+        quickPrompts: {
+            pmKisan: "पीएम-किसान स्थिति जांच",
+            insurance: "फसल बीमा विकल्प"
+        },
+        docTypeDisplay: {
+            aadhaar: "आधार",
+            land: "जमीन रेकॉर्ड",
+            bank: "बैंक पासबुक"
+        },
+        msg: {
+            kisanCallCenter: "किसान कॉल सेंटर: {number}",
+            chatCleared: "चैट साफ हो गइल। तैयार होखीं त नया बातचीत शुरू करीं।",
+            detectingLocation: "GPS लोकेशन पता कइल जा रहल बा...",
+            locationUnsupported: "रउरा ब्राउज़र में लोकेशन सपोर्ट नइखे।",
+            autoDetectFailed: "लोकेशन अपने आप ना मिलल। कृपया राज्य चुनीं।",
+            gpsDenied: "GPS अनुमति ना मिलल। कृपया राज्य चुनीं।",
+            locationFound: "लोकेशन मिलल: **{state}**",
+            locationFallback: "रउआँ **{state}** में बानी। कृपया लिस्ट से नजदीकी राज्य चुनीं।",
+            selectStateFirst: "पहिले राज्य चुनीं।",
+            fetchingSchemes: "**{state}** खातिर ताजा योजना लावल जा रहल बा...",
+            topSchemes: "**{state} खातिर टॉप योजना:**<br><br>{reply}",
+            fetchSchemesError: "<b>एह बखत Gemini से योजना ना मिल पावल।</b><br><code>app.py</code> चल रहल बा कि ना, देख के फेर कोशिश करीं।",
+            imageLoaded: "फोटो लोड हो गइल बा। अब ई फोटो पर सवाल पूछीं।",
+            imageSent: "फोटो भेजल गइल",
+            connectionFailed: "<b>कनेक्शन फेल हो गइल।</b><br>app.py पोर्ट 5001 पर चल रहल बा?<br>टर्मिनल देखीं।",
+            voiceNotSupported: "एह ब्राउज़र में आवाज़ इनपुट सपोर्ट नइखे।",
+            voiceFailed: "आवाज़ इनपुट फेल हो गइल। फेर कोशिश करीं।",
+            docAttached: "**{type} जोड़ल गइल।**<br>तैयारी स्कोर: <b>{score}/100</b>",
+            docMissing: "<br><span class='missing-note'>बाकी: {missing}</span>",
+            docAllAttached: "<br><span style='color:#147145; font-weight:700;'>सब जरूरी दस्तावेज़ जुड़ गइल बा।</span>"
+        }
+    }
+};
+
+function formatTemplate(text, values) {
+    let out = String(text || "");
+    Object.keys(values || {}).forEach((key) => {
+        const replacement = String(values[key]);
+        out = out.replace(new RegExp("\\{" + key + "\\}", "g"), () => replacement);
+    });
+    return out;
+}
+
+function getUiLanguageCode() {
+    const selected = languageSelect ? languageSelect.value : "en";
+    return uiLanguageContent[selected] ? selected : "en";
+}
+
+function getUiText() {
+    return uiLanguageContent[getUiLanguageCode()] || uiLanguageContent.en;
+}
+
+function getRuntimeText() {
+    return uiRuntimeText[getUiLanguageCode()] || uiRuntimeText.en;
+}
+
+function setSelectOptionText(selectEl, optionValue, label) {
+    if (!selectEl) return;
+    for (let i = 0; i < selectEl.options.length; i += 1) {
+        if (selectEl.options[i].value === optionValue) {
+            selectEl.options[i].textContent = label;
+            return;
+        }
+    }
+}
+
+function applySidebarLanguage() {
+    const ui = getUiText();
+    const rt = getRuntimeText();
+    const brandSubtitle = document.getElementById("brandSubtitle");
+    const docHeading = document.getElementById("docHeading");
+    const faqTitle = document.getElementById("faqTitle");
+    const faqQ1Label = document.getElementById("faqQ1Label");
+    const faqQ2Label = document.getElementById("faqQ2Label");
+    const faqQ3Label = document.getElementById("faqQ3Label");
+    const faqA1 = document.getElementById("faqA1");
+    const faqA2 = document.getElementById("faqA2");
+    const faqA3 = document.getElementById("faqA3");
+    const statusText = document.getElementById("statusText");
+    const languageLabel = document.getElementById("languageLabel");
+    const locateBtn = document.getElementById("locateBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const pmKisanBtn = document.getElementById("pmKisanBtn");
+    const insuranceBtn = document.getElementById("insuranceBtn");
+    const helplineBtn = document.getElementById("helplineBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stateSelect = document.getElementById("stateSelect");
+    const docTypeSelect = document.getElementById("docType");
+    const chatTitle = document.getElementById("chatTitle");
+    const initialBotHead = document.getElementById("initialBotHead");
+    const initialBotText = document.getElementById("initialBotText");
+    const initialBotTime = document.getElementById("initialBotTime");
+    const previewCaption = document.getElementById("previewCaption");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const cameraBtn = document.getElementById("cameraBtn");
+    const voiceBtn = document.getElementById("voiceBtn");
+    const resizerEl = document.getElementById("sidebarResizer");
+
+    document.documentElement.lang = getUiLanguageCode();
+    document.title = rt.pageTitle;
+
+    if (brandSubtitle) brandSubtitle.textContent = ui.brandSubtitle;
+    if (docHeading) docHeading.textContent = ui.docHeading;
+    if (docAadhaar) docAadhaar.textContent = ui.docItems.aadhaar;
+    if (docLand) docLand.textContent = ui.docItems.land;
+    if (docBank) docBank.textContent = ui.docItems.bank;
+    if (faqTitle) faqTitle.textContent = ui.faqTitle;
+
+    if (faqQ1Label) faqQ1Label.textContent = ui.faqs[0].q;
+    if (faqQ2Label) faqQ2Label.textContent = ui.faqs[1].q;
+    if (faqQ3Label) faqQ3Label.textContent = ui.faqs[2].q;
+    if (faqA1) faqA1.textContent = ui.faqs[0].a;
+    if (faqA2) faqA2.textContent = ui.faqs[1].a;
+    if (faqA3) faqA3.textContent = ui.faqs[2].a;
+    if (statusText) statusText.textContent = ui.statusOnline;
+    if (languageLabel) languageLabel.textContent = ui.languageLabel;
+    if (chatTitle) chatTitle.textContent = rt.chatTitle;
+    if (mobileSidebarToggle) mobileSidebarToggle.textContent = rt.insights;
+
+    if (locateBtn) locateBtn.textContent = ui.quickActions.locate;
+    if (uploadBtn) uploadBtn.textContent = ui.quickActions.upload;
+    if (pmKisanBtn) pmKisanBtn.textContent = ui.quickActions.pmKisan;
+    if (insuranceBtn) insuranceBtn.textContent = ui.quickActions.insurance;
+    if (helplineBtn) helplineBtn.textContent = ui.quickActions.helpline;
+    if (resetBtn) resetBtn.textContent = ui.quickActions.reset;
+
+    if (stateSelect) {
+        setSelectOptionText(stateSelect, "", ui.quickActions.selectState);
+        Object.keys(ui.stateOptions).forEach((stateKey) => {
+            setSelectOptionText(stateSelect, stateKey, ui.stateOptions[stateKey]);
+        });
+    }
+
+    if (docTypeSelect) {
+        setSelectOptionText(docTypeSelect, "", ui.quickActions.selectDocType);
+        Object.keys(ui.docTypeOptions).forEach((docKey) => {
+            setSelectOptionText(docTypeSelect, docKey, ui.docTypeOptions[docKey]);
+        });
+    }
+
+    if (languageSelect) {
+        const langOptions = ui.languageOptions || uiLanguageContent.en.languageOptions;
+        Object.keys(langOptions).forEach((langCode) => {
+            setSelectOptionText(languageSelect, langCode, langOptions[langCode]);
+        });
+    }
+
+    if (previewCaption) previewCaption.textContent = rt.previewCaption;
+    if (userInput && !(voiceBtn && voiceBtn.classList.contains("listening"))) {
+        userInput.placeholder = rt.inputPlaceholder;
+    }
+    if (sendBtn) sendBtn.textContent = rt.sendLabel;
+    if (cameraBtn) {
+        cameraBtn.title = rt.openCameraLabel;
+        cameraBtn.setAttribute("aria-label", rt.openCameraLabel);
+    }
+    if (voiceBtn) {
+        voiceBtn.title = rt.voiceInputLabel;
+        voiceBtn.setAttribute("aria-label", rt.voiceInputLabel);
+    }
+    if (resizerEl) resizerEl.title = rt.dragToResize;
+
+    if (initialBotHead) initialBotHead.textContent = rt.assistantLabel;
+    if (initialBotText) initialBotText.innerHTML = rt.initialBotHtml;
+    if (initialBotTime) initialBotTime.textContent = rt.nowLabel;
+
+    document.querySelectorAll(".message.bot .message-head").forEach((el) => {
+        el.textContent = rt.assistantLabel;
+    });
+    document.querySelectorAll(".message.user .message-head").forEach((el) => {
+        el.textContent = rt.userLabel;
+    });
+
+    document.querySelectorAll(".faq-content.open").forEach((content) => {
+        content.style.maxHeight = (content.scrollHeight + 24) + "px";
+    });
+
+    updateDocReadiness();
+}
+
+function setSidebarWidth(px) {
+    if (!sidebar || !mainContainer) return;
+    const maxByContainer = mainContainer.clientWidth - minChat - resizerWidth;
+    const allowedMax = Math.min(maxSidebar, maxByContainer);
+    const clamped = Math.max(minSidebar, Math.min(allowedMax, px));
+    sidebar.style.width = clamped + "px";
+    localStorage.setItem("sidebarWidth", String(clamped));
+}
+
+const savedWidth = parseInt(localStorage.getItem("sidebarWidth"), 10);
+if (!Number.isNaN(savedWidth) && window.innerWidth > 880) setSidebarWidth(savedWidth);
+
+if (resizer) {
+    resizer.addEventListener("pointerdown", (e) => {
+        if (window.innerWidth <= 880) return;
+        e.preventDefault();
+        resizer.setPointerCapture(e.pointerId);
+        document.body.classList.add("resizing");
+        const startX = e.clientX;
+        const startWidth = sidebar.getBoundingClientRect().width;
+
+        const onMove = (ev) => {
+            const delta = ev.clientX - startX;
+            setSidebarWidth(startWidth + delta);
+        };
+
+        const onUp = () => {
+            document.removeEventListener("pointermove", onMove);
+            document.removeEventListener("pointerup", onUp);
+            document.body.classList.remove("resizing");
+        };
+
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+    });
+}
+
+window.addEventListener("resize", () => {
+    if (window.innerWidth > 880) {
+        const current = parseInt(localStorage.getItem("sidebarWidth"), 10);
+        if (!Number.isNaN(current)) setSidebarWidth(current);
+        toggleMobileSidebar(false);
+    }
+});
+
+if (mobileSidebarToggle) {
+    mobileSidebarToggle.addEventListener("click", () => toggleMobileSidebar());
+}
+
+if (mobileOverlay) {
+    mobileOverlay.addEventListener("click", () => toggleMobileSidebar(false));
+}
+
+function toggleMobileSidebar(forceOpen) {
+    if (!mainContainer) return;
+    const willOpen = typeof forceOpen === "boolean"
+        ? forceOpen
+        : !mainContainer.classList.contains("show-sidebar");
+    mainContainer.classList.toggle("show-sidebar", willOpen);
+}
+
+function toggleFAQ(btn) {
+    const content = btn.nextElementSibling;
+    const isOpen = content.classList.contains("open");
+
+    document.querySelectorAll(".faq-btn").forEach((b) => {
+        b.classList.remove("active");
+        const icon = b.querySelector(".faq-icon");
+        if (icon) icon.textContent = "+";
+    });
+
+    document.querySelectorAll(".faq-content").forEach((c) => {
+        c.classList.remove("open");
+        c.style.maxHeight = null;
+    });
+
+    if (!isOpen) {
+        btn.classList.add("active");
+        content.classList.add("open");
+        content.style.maxHeight = (content.scrollHeight + 24) + "px";
+        const icon = btn.querySelector(".faq-icon");
+        if (icon) icon.textContent = "-";
+    }
+}
+
+function updateDocReadiness() {
+    const ui = getUiText();
+    let score = 0;
+    Object.keys(uploadedDocs).forEach((key) => {
+        if (uploadedDocs[key]) score += eligibilityScoreMap[key];
+    });
+
+    if (docProgressBar) docProgressBar.style.width = score + "%";
+
+    const missing = [];
+    if (!uploadedDocs.aadhaar) missing.push(ui.docItems.aadhaar);
+    if (!uploadedDocs.land) missing.push(ui.docItems.land);
+    if (!uploadedDocs.bank) missing.push(ui.docItems.bank);
+
+    if (docProgressText) {
+        if (score === 100) {
+            docProgressText.innerHTML = ui.docDone;
+        } else if (score === 0) {
+            docProgressText.innerHTML = ui.docStart;
+        } else {
+            docProgressText.innerHTML = ui.docCurrent
+                .replace("{score}", String(score))
+                .replace("{missing}", missing.join(", "));
+        }
+    }
+
+    if (docAadhaar) docAadhaar.classList.toggle("ready", uploadedDocs.aadhaar);
+    if (docLand) docLand.classList.toggle("ready", uploadedDocs.land);
+    if (docBank) docBank.classList.toggle("ready", uploadedDocs.bank);
+}
+
+if (languageSelect) {
+    languageSelect.addEventListener("change", () => {
+        applySidebarLanguage();
+    });
+}
+
+applySidebarLanguage();
+
+function handleEnter(e) {
+    if (e.key === "Enter") sendMessage();
+}
+
+function sendQuick(text) {
+    const input = document.getElementById("userInput");
+    input.value = text;
+    sendMessage();
+}
+
+function sendQuickPrompt(promptKey) {
+    const rt = getRuntimeText();
+    const fallback = uiRuntimeText.en.quickPrompts || {};
+    const prompts = rt.quickPrompts || fallback;
+    const promptText = prompts[promptKey] || fallback[promptKey] || "";
+    if (!promptText) return;
+    sendQuick(promptText);
+}
+
+function callHelp() {
+    const rt = getRuntimeText();
+    const number = "1800-180-1551";
+    if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+        window.location.href = "tel:" + number.replace(/-/g, "");
+    } else {
+        alert(formatTemplate(rt.msg.kisanCallCenter, { number: number }));
+    }
+}
+
+function clearChat() {
+    const rt = getRuntimeText();
+    const chatBody = document.getElementById("chatBody");
+    chatBody.innerHTML = "";
+    addMessage("bot", rt.msg.chatCleared);
+
+    uploadedDocs.aadhaar = false;
+    uploadedDocs.land = false;
+    uploadedDocs.bank = false;
+
+    updateDocReadiness();
+    clearPreview();
+}
+
+function clearPreview() {
+    document.getElementById("previewContainer").style.display = "none";
+    document.getElementById("docPreview").src = "";
+    currentImageBase64 = null;
+}
+
+function showTyping() {
+    const rt = getRuntimeText();
+    hideTyping();
+
+    const chatBody = document.getElementById("chatBody");
+    const typing = document.createElement("div");
+    typing.className = "message bot typing";
+    typing.innerHTML = "<div class='message-head'>" + escapeHtml(rt.assistantLabel) + "</div><div class='message-text'><span class='typing-dot'></span><span class='typing-dot'></span><span class='typing-dot'></span></div>";
+
+    chatBody.appendChild(typing);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    activeTypingEl = typing;
+}
+
+function hideTyping() {
+    if (activeTypingEl && activeTypingEl.parentNode) {
+        activeTypingEl.parentNode.removeChild(activeTypingEl);
+    }
+    activeTypingEl = null;
+}
+
+function detectLocation() {
+    const rt = getRuntimeText();
+    addMessage("bot", rt.msg.detectingLocation);
+
+    if (!navigator.geolocation) {
+        addMessage("bot", rt.msg.locationUnsupported);
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon)
+                .then((response) => response.json())
+                .then((data) => {
+                    const detectedState = data.address && data.address.state;
+                    if (detectedState) {
+                        applyState(detectedState);
+                    } else {
+                        throw new Error("State not found");
+                    }
+                })
+                .catch(() => {
+                    fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + lat + "&longitude=" + lon + "&localityLanguage=en")
+                        .then((res) => res.json())
+                        .then((data) => applyState(data.principalSubdivision))
+                        .catch(() => addMessage("bot", rt.msg.autoDetectFailed));
+                });
+        },
+        () => {
+            addMessage("bot", rt.msg.gpsDenied);
+        }
+    );
+}
+
+function applyState(detectedState) {
+    const rt = getRuntimeText();
+    const select = document.getElementById("stateSelect");
+    let matchFound = false;
+
+    for (let i = 0; i < select.options.length; i += 1) {
+        const val = select.options[i].value;
+        if (val && (val.includes(detectedState) || detectedState.includes(val))) {
+            select.selectedIndex = i;
+            matchFound = true;
+            break;
+        }
+    }
+
+    if (matchFound) {
+        addMessage("bot", formatTemplate(rt.msg.locationFound, { state: detectedState }));
+        sendLocationSchemes();
+    } else {
+        addMessage("bot", formatTemplate(rt.msg.locationFallback, { state: detectedState }));
+    }
+}
+
+function sendLocationSchemes() {
+    const rt = getRuntimeText();
+    const state = document.getElementById("stateSelect").value;
+    if (!state) {
+        addMessage("bot", rt.msg.selectStateFirst);
+        return;
+    }
+
+    const lang = document.getElementById("language").value;
+    const today = new Date().toLocaleDateString();
+
+    addMessage("bot", formatTemplate(rt.msg.fetchingSchemes, { state: state }));
+    showTyping();
+
+    const prompt = [
+        "Today is " + today + ".",
+        "Provide the top government schemes for farmers in " + state + ", India.",
+        "Focus on currently active or most relevant schemes.",
+        "Return exactly 5 items.",
+        "For each item include: scheme name, central/state tag, one-line benefit, and who it helps.",
+        "If known, include the official source site name in the same line.",
+        "If uncertain about a scheme status, write: Please verify on official government sources.",
+        "Use a clean numbered list.",
+        "Do not use tables or markdown pipes."
+    ].join(" ");
+
+    fetch(CHAT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt, language: lang, image: null })
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            addMessage("bot", formatTemplate(rt.msg.topSchemes, { state: state, reply: data.reply }));
+            speakText(data.reply, lang);
+        })
+        .catch(() => {
+            addMessage("bot", rt.msg.fetchSchemesError);
+        })
+        .finally(() => hideTyping());
+}
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function applyInlineHighlights(text) {
+    if (!text) return "";
+
+    let out = String(text);
+    // Keep emphasis only for short inline phrases, not full paragraphs.
+    out = out.replace(/\*\*([^*\n]{1,90})\*\*/g, "<strong>$1</strong>");
+    out = out.replace(/__([^_\n]{1,90})__/g, "<strong>$1</strong>");
+    // If model sends unmatched/large markdown markers, drop markers instead of bolding all text.
+    out = out.replace(/\*\*/g, "");
+    out = out.replace(/__/g, "");
+    out = out.replace(/\[(Central|State)\]/gi, "<span class='scheme-tag'>[$1]</span>");
+    out = out.replace(/\b(Important|Eligibility|Benefit|Benefits|Deadline)\b/gi, "<span class='key-word'>$1</span>");
+    out = out.replace(/(Please verify on official government sources\.?)/gi, "<span class='scheme-note'>$1</span>");
+    return out;
+}
+
+function splitSchemeNameAndDesc(itemText) {
+    const clean = itemText.replace(/\s+/g, " ").trim();
+    let name = clean;
+    let desc = "";
+
+    const dashSplit = clean.split(/\s[-–—]\s/);
+    if (dashSplit.length > 1) {
+        name = dashSplit.shift();
+        desc = dashSplit.join(" - ");
+    } else {
+        const colonMatch = clean.match(/^(.{1,120}?)[：:]\s+(.+)$/);
+        if (colonMatch) {
+            name = colonMatch[1];
+            desc = colonMatch[2];
+        }
+    }
+
+    // Fallback: avoid rendering very long single-block text as a "name".
+    if (!desc && clean.length > 140) {
+        const sentenceSplit = clean.split(/(?<=[.!?])\s+/);
+        if (sentenceSplit.length > 1) {
+            name = sentenceSplit[0];
+            desc = sentenceSplit.slice(1).join(" ");
+        }
+    }
+
+    return {
+        name: applyInlineHighlights(name),
+        desc: applyInlineHighlights(desc)
+    };
+}
+
+function formatBotHtml(text) {
+    if (!text) return "";
+
+    let raw = String(text);
+    raw = raw.replace(/^\s*\|.*\|\s*$/gm, "");
+    raw = raw.replace(/^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$/gm, "");
+    raw = raw.replace(/\s*\|\s*/g, " - ");
+    raw = raw.replace(/\s*\+\s*/g, " - ");
+    raw = raw.replace(/<br\s*\/?>/gi, "\n");
+    // Force inline star bullets into new lines: "... text. * point" => new line bullet.
+    raw = raw.replace(/([^\n])\s+\*\s+/g, "$1\n* ");
+    raw = raw.replace(/([^\n])\s+•\s+/g, "$1\n• ");
+    raw = raw.replace(/([^\n])\s+-\s+(?=[A-Z(])/g, "$1\n- ");
+    raw = raw.replace(/\r/g, "").trim();
+
+    const firstItemPos = raw.search(/(?:^|\n)\d+\.\s+/);
+    const prefix = firstItemPos >= 0 ? raw.slice(0, firstItemPos).trim() : raw;
+
+    const itemRegex = /(?:^|\n)(\d+)\.\s+([\s\S]*?)(?=\n\d+\.\s+|$)/g;
+    const items = [];
+    let match;
+    while ((match = itemRegex.exec(raw)) !== null) {
+        items.push({ index: match[1], text: match[2].trim() });
+    }
+
+    if (items.length > 0) {
+        const prefixLines = prefix
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+        let title = "";
+        let intro = "";
+        if (prefixLines.length > 0) {
+            const firstLine = prefixLines[0];
+            const looksLikeTitle =
+                /schemes?|status|summary|report|update/i.test(firstLine) ||
+                /:\s*$/.test(firstLine) ||
+                firstLine.length <= 80;
+
+            if (looksLikeTitle) {
+                title = applyInlineHighlights(firstLine.replace(/[:\s]+$/, ""));
+                intro = applyInlineHighlights(prefixLines.slice(1).join(" "));
+            } else {
+                intro = applyInlineHighlights(prefixLines.join(" "));
+            }
+        }
+
+        const listHtml = items.map((item) => {
+            const formatted = splitSchemeNameAndDesc(item.text.replace(/\n+/g, " "));
+            return (
+                "<div class='scheme-item'>" +
+                    "<div class='scheme-index'>" + item.index + "</div>" +
+                    "<div class='scheme-body'>" +
+                        "<div class='scheme-name'>" + formatted.name + "</div>" +
+                        (formatted.desc ? "<div class='scheme-desc'>" + formatted.desc + "</div>" : "") +
+                    "</div>" +
+                "</div>"
+            );
+        }).join("");
+
+        return (
+            "<div class='bot-rich'>" +
+                (title ? "<h3 class='bot-title'>" + title + "</h3>" : "") +
+                (intro ? "<p class='bot-intro'>" + intro + "</p>" : "") +
+                "<div class='scheme-list'>" + listHtml + "</div>" +
+            "</div>"
+        );
+    }
+
+    const lines = raw
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    if (lines.length === 0) return "";
+
+    let title = "";
+    let contentLines = lines;
+    if (lines.length > 1 && (/:\s*$/.test(lines[0]) || /schemes?|status|summary|help/i.test(lines[0]))) {
+        title = applyInlineHighlights(lines[0].replace(/[:\s]+$/, ""));
+        contentLines = lines.slice(1);
+    }
+
+    const bulletLines = [];
+    const plainLines = [];
+    contentLines.forEach((line) => {
+        const isBullet = /^([*•-])\s+/.test(line);
+        if (isBullet) {
+            bulletLines.push(line.replace(/^([*•-])\s+/, "").trim());
+        } else {
+            plainLines.push(line);
+        }
+    });
+
+    let html = "<div class='bot-rich'>";
+    if (title) {
+        html += "<h3 class='bot-title'>" + title + "</h3>";
+    }
+    plainLines.forEach((line) => {
+        html += "<p class='bot-paragraph'>" + applyInlineHighlights(line) + "</p>";
+    });
+    if (bulletLines.length > 0) {
+        html += "<ul class='bot-bullet-list'>";
+        bulletLines.forEach((line) => {
+            html += "<li class='bot-bullet-item'>" + applyInlineHighlights(line) + "</li>";
+        });
+        html += "</ul>";
+    }
+
+    html += "</div>";
+    return html;
+}
+
+function addMessage(sender, content) {
+    const rt = getRuntimeText();
+    const chatBody = document.getElementById("chatBody");
+    const div = document.createElement("div");
+    div.className = "message " + sender;
+
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    if (sender === "bot") {
+        div.innerHTML = "<div class='message-head'>" + escapeHtml(rt.assistantLabel) + "</div><div class='message-text'>" + formatBotHtml(content) + "</div><div class='message-time'>" + time + "</div>";
+    } else {
+        const safeText = escapeHtml(content).replace(/\n/g, "<br>");
+        div.innerHTML = "<div class='message-head'>" + escapeHtml(rt.userLabel) + "</div><div class='message-text'>" + safeText + "</div><div class='message-time'>" + time + "</div>";
+    }
+
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function handleDocumentUpload(input) {
+    const ui = getUiText();
+    const rt = getRuntimeText();
+    if (!input.files.length) return;
+
+    const type = document.getElementById("docType").value;
+    const file = input.files[0];
+
+    document.getElementById("docPreview").src = URL.createObjectURL(file);
+    document.getElementById("previewContainer").style.display = "block";
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const parts = String(e.target.result).split(",");
+        currentImageBase64 = parts.length > 1 ? parts[1] : null;
+
+        if (type) {
+            uploadedDocs[type] = true;
+            updateDocReadiness();
+
+            let score = 0;
+            Object.keys(uploadedDocs).forEach((key) => {
+                if (uploadedDocs[key]) score += eligibilityScoreMap[key];
+            });
+
+            const missing = [];
+            if (!uploadedDocs.aadhaar) missing.push(ui.docItems.aadhaar);
+            if (!uploadedDocs.land) missing.push(ui.docItems.land);
+            if (!uploadedDocs.bank) missing.push(ui.docItems.bank);
+
+            const displayType = (rt.docTypeDisplay && rt.docTypeDisplay[type]) ? rt.docTypeDisplay[type] : type;
+            let statusHtml = formatTemplate(rt.msg.docAttached, {
+                type: displayType,
+                score: score
+            });
+            if (missing.length > 0) {
+                statusHtml += formatTemplate(rt.msg.docMissing, { missing: missing.join(", ") });
+            } else {
+                statusHtml += rt.msg.docAllAttached;
+            }
+            addMessage("bot", statusHtml);
+        } else {
+            addMessage("bot", rt.msg.imageLoaded);
+        }
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const msg = input.value.trim();
+    const lang = document.getElementById("language").value;
+    const rt = getRuntimeText();
+
+    if (!msg && !currentImageBase64) return;
+
+    if (currentImageBase64) {
+        const userText = msg ? rt.msg.imageSent + "\n" + msg : rt.msg.imageSent;
+        addMessage("user", userText);
+        document.getElementById("previewContainer").style.display = "none";
+    } else {
+        addMessage("user", msg);
+    }
+
+    input.value = "";
+    showTyping();
+
+    fetch(CHAT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, language: lang, image: currentImageBase64 })
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            addMessage("bot", data.reply);
+            speakText(data.reply, lang);
+            currentImageBase64 = null;
+        })
+        .catch((err) => {
+            console.error(err);
+            addMessage("bot", rt.msg.connectionFailed);
+            currentImageBase64 = null;
+        })
+        .finally(() => hideTyping());
+}
+
+function startVoice() {
+    const rt = getRuntimeText();
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert(rt.msg.voiceNotSupported);
+        return;
+    }
+
+    const voiceBtn = document.getElementById("voiceBtn");
+    const input = document.getElementById("userInput");
+    
+    // Prevent multiple parallel recognizers (causes repeated submissions).
+    if (voiceSessionActive && activeRecognition) {
+        try { activeRecognition.stop(); } catch (_) {}
+        return;
+    }
+    
+
+    const rec = new SpeechRecognition();
+    activeRecognition = rec;
+    voiceSessionActive = true;
+    let hasSubmitted = false;
+
+    const langMap = {
+        en: "en-IN",
+        hi: "hi-IN",
+        ta: "ta-IN",
+        te: "te-IN",
+        bn: "bn-IN",
+        bho: "hi-IN"
+    };
+
+    rec.lang = langMap[document.getElementById("language").value] || "en-IN";
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    const cleanup = () => {
+        voiceSessionActive = false;
+        activeRecognition = null;
+        input.placeholder = rt.inputPlaceholder;
+        if (voiceBtn) voiceBtn.classList.remove("listening");
+    };
+
+    rec.onstart = () => {
+        input.placeholder = rt.listeningPlaceholder;
+        if (voiceBtn) voiceBtn.classList.add("listening");
+    };
+
+    rec.onend = () => {
+        cleanup();
+    };
+
+    rec.onresult = (e) => {
+        if (hasSubmitted) return;
+        const result = (e.results && (e.results[e.resultIndex] || e.results[0])) || null;
+        if (!result) return;
+        if (result.isFinal === false) return;
+
+        const transcript = (result[0] && result[0].transcript ? result[0].transcript : "").trim();
+        if (!transcript) return;
+
+        hasSubmitted = true;
+        input.value = transcript;
+        sendMessage();
+        try { rec.stop(); } catch (_) {}
+    };
+
+    rec.onerror = () => {
+        cleanup();
+        alert(rt.msg.voiceFailed);
+    };
+
+    try {
+        rec.start();
+    } catch (_) {
+        cleanup();
+    }
+}
+
+function speakText(text, lang) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+
+    const utter = new SpeechSynthesisUtterance(stripForSpeech(text));
+    const langMap = {
+        en: "en-IN",
+        hi: "hi-IN",
+        ta: "ta-IN",
+        te: "te-IN",
+        bn: "bn-IN",
+        bho: "hi-IN"
+    };
+
+    utter.lang = langMap[lang] || "en-IN";
+    window.speechSynthesis.speak(utter);
+}
+
+function stripForSpeech(text) {
+    if (!text) return "";
+
+    let clean = text;
+    clean = clean.replace(/<[^>]*>/g, " ");
+    clean = clean.replace(/\*\*|__/g, "");
+    clean = clean.replace(/[*_`~]/g, "");
+    clean = clean.replace(/\s+/g, " ").trim();
+
+    return clean;
+}
+</script>
+</body>
+</html>

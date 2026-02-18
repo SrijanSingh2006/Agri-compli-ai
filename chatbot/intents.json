@@ -1,0 +1,8 @@
+{
+  "greeting": ["hi", "hello", "namaste"],
+  "scheme_info": ["scheme", "yojana"],
+  "documents": ["documents", "papers"],
+  "compliance": ["gst", "itr"],
+  "eligibility": ["eligible"],
+  "goodbye": ["bye", "thank you"]
+}

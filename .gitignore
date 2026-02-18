@@ -1,0 +1,5 @@
+.env
+AgriComply-AI-main/server/.env
+AgriComply-AI-main/client/.env
+__pycache__/
+*.pyc
